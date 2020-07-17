@@ -72,8 +72,6 @@ open class CordovaFragment : Fragment() {
 
     inner class CordovaInterface : SimpleCordovaInterface() {
 
-        var resultCallback: CordovaPlugin? = null
-
         override fun getHandler() = this@CordovaFragment
 
         override fun getActivity() = this@CordovaFragment.activity
@@ -83,52 +81,21 @@ open class CordovaFragment : Fragment() {
         override fun getThreadPool() = Executors.newCachedThreadPool()
 
         override fun startActivityForResult(plugin: CordovaPlugin?, intent: Intent?, requestCode: Int) {
-            resultCallback = plugin
             startActivityForResult(intent, requestCode)
         }
 
-        override fun hasPermission(permission: String?): Boolean {
-            return if (permission != null) {
-                ActivityCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED
-            } else {
-                false
-            }
-        }
+        override fun hasPermission(permission: String?) = false
 
-        override fun requestPermission(plugin: CordovaPlugin?, requestcode: Int, permission: String?) {
-            resultCallback = plugin
-            permission?.let {
-                ActivityCompat.requestPermissions(requireActivity(), arrayOf(permission), requestcode)
-            }
-        }
+        override fun requestPermission(plugin: CordovaPlugin?, requestcode: Int, permission: String?) = Unit
 
-        override fun requestPermissions(plugin: CordovaPlugin?, requestcode: Int, permissions: Array<out String>?) {
-            resultCallback = plugin
-            permissions?.let {
-                ActivityCompat.requestPermissions(requireActivity(), permissions, requestcode)
-            }
-        }
+        override fun requestPermissions(plugin: CordovaPlugin?, requestcode: Int, permissions: Array<out String>?)  = Unit
 
-        override fun setActivityResultCallback(plugin: CordovaPlugin?) {
-            resultCallback = plugin
-        }
+        override fun setActivityResultCallback(plugin: CordovaPlugin?)  = Unit
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        cordovaInterface.resultCallback?.let {
-            cordovaInterface.threadPool.execute {
-                it.onActivityResult(requestCode, resultCode, data)
-            }
-        }
-    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) = Unit
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        cordovaInterface.resultCallback?.let {
-            cordovaInterface.threadPool.execute {
-                it.onRequestPermissionResult(requestCode, permissions, grantResults)
-            }
-        }
-    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray)  = Unit
 
     companion object {
         private val KEY_URL = "url"
